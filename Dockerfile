@@ -6,7 +6,7 @@ FROM php:8.2-fpm-alpine
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY ./docker/app/supervisor/supervisord.conf /etc/supervisord.conf
+COPY ./supervisor/supervisord.conf /etc/supervisord.conf
 
 RUN apk update && apk upgrade
 RUN apk add build-base autoconf libzip-dev libpng-dev libjpeg-turbo-dev libwebp-dev libsodium-dev icu-dev bash redis supervisor
@@ -27,7 +27,7 @@ RUN apk add --no-cache bash curl && curl -1sLf \
 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash \
 && apk add infisical
 
-COPY ./docker/app/php.ini-production /usr/local/etc/php/conf.d/php.ini
+COPY ./php.ini-production /usr/local/etc/php/conf.d/php.ini
 
 # Установка и включение расширения GD
 RUN apk add --no-cache freetype libpng libjpeg-turbo freetype-dev && \
