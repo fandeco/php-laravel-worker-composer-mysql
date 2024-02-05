@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  app:
+    build:
+      dockerfile: ./docker/app/Dockerfile
+    volumes:
+      - '.:/var/www/html'
+    networks:
+      - sail
+    user: '82:82'
+networks:
+  sail:
