@@ -1,8 +1,8 @@
-ARG PHP_VERSION=8.2
+ARG PHP_VERSION=8.4
 ARG TZ=Europe/Moscow
 
 # Второй этап: установка зависимостей с использованием Composer
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -19,9 +19,10 @@ RUN docker-php-ext-install zip
 RUN docker-php-ext-install bz2
 RUN docker-php-ext-install sodium
 RUN docker-php-ext-install pdo_mysql
-RUN docker-php-ext-install sodium
 RUN docker-php-ext-install intl
 RUN docker-php-ext-install pcntl
+RUN docker-php-ext-install imagick
+RUN docker-php-ext-install bcmath
 
 RUN apk add --no-cache bash curl && curl -1sLf \
 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash \
