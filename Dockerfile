@@ -21,7 +21,6 @@ RUN docker-php-ext-install sodium
 RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install intl
 RUN docker-php-ext-install pcntl
-RUN docker-php-ext-install imagick
 RUN docker-php-ext-install bcmath
 
 RUN apk add --no-cache bash curl && curl -1sLf \
