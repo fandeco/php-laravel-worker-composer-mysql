@@ -49,7 +49,7 @@ RUN apk add --no-cache \
     libwebp-dev
 
 # Установите и включите расширение imagick
-RUN pecl install imagick && docker-php-ext-enable imagick
+# RUN pecl install imagick && docker-php-ext-enable imagick
 # Установите и включите расширение redis
 RUN pecl install redis && docker-php-ext-enable redis
 
