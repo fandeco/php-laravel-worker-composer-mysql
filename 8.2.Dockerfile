@@ -1,8 +1,8 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.2
 ARG TZ=Europe/Moscow
 
 # Второй этап: установка зависимостей с использованием Composer
-FROM php:8.4-fpm-alpine
+FROM php:8.2-fpm-alpine
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
