@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.4.3
 ARG TZ=Europe/Moscow
 
 # Второй этап: установка зависимостей с использованием Composer
