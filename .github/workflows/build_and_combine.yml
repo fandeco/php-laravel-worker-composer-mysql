@@ -1,0 +1,96 @@
+name: Build and Combine PHP Images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_amd64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and archive PHP images for amd64
+        run: |
+          mkdir -p build/images
+          mkdir -p build/logs
+          ./build/build_amd64.sh
+
+      - name: Upload PHP images archive for amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: php_images_amd64
+          path: build/images/php_images.tar.gz
+          retention-days: 7
+
+  build_arm64:
+    runs-on: ubuntu-latest-arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and archive PHP images for arm64
+        run: |
+          mkdir -p build/images
+          mkdir -p build/logs
+          ./build/build_arm64.sh
+
+      - name: Upload PHP images archive for arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: php_images_arm64
+          path: build/images/php_images.tar.gz
+          retention-days: 7
+
+  combine_images:
+    needs: [build_amd64, build_arm64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Download PHP images archive for amd64
+        uses: actions/download-artifact@v3
+        with:
+          name: php_images_amd64
+          path: build/images
+
+      - name: Download PHP images archive for arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: php_images_arm64
+          path: build/images
+
+      - name: Extract PHP images archives
+        run: |
+          mkdir -p build/images
+          tar -xzvf build/images/php_images_amd64/php_images.tar.gz -C build/images
+          tar -xzvf build/images/php_images_arm64/php_images.tar.gz -C build/images
+
+      - name: Combine and push PHP images
+        run: |
+          mkdir -p build/images
+          mkdir -p build/logs
+          ./build/combine_images.sh
+
+      - name: Upload combined PHP images archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: php_combined_images
+          path: build/images/php_images.tar.gz
+          retention-days: 7

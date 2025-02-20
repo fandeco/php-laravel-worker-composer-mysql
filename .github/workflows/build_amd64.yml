@@ -1,0 +1,31 @@
+name: Build PHP Images for amd64
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and archive PHP images for amd64
+        run: |
+          mkdir -p build/images
+          mkdir -p build/logs
+          ./build/build_amd64.sh
+
+      - name: Upload PHP images archive for amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: php_images_amd64
+          path: build/images/php_images.tar.gz
+          retention-days: 7
