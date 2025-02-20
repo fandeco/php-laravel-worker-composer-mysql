@@ -7,52 +7,52 @@ ARG WITH_XDEBUG=false
 FROM php:${PHP_VERSION}-fpm-alpine AS base
 
 # Установка системных зависимостей
-RUN apk update && apk upgrade && \
-    apk add --no-cache \
-    build-base \
-    bash \
-    nano \
-    curl \
-    autoconf \
-    icu-dev \
-    redis \
-    libsodium-dev \
-    supervisor \
-    libtool \
-    libwebp-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    libpng-dev \
-    imagemagick-dev
+RUN apk update && apk upgrade
+RUN apk add --no-cache
+RUN apk add --no-cache build-base
+RUN apk add --no-cache bash
+RUN apk add --no-cache nano
+RUN apk add --no-cache curl
+RUN apk add --no-cache autoconf
+RUN apk add --no-cache icu-dev
+RUN apk add --no-cache redis
+RUN apk add --no-cache libsodium-dev
+RUN apk add --no-cache supervisor
+RUN apk add --no-cache libtool
+RUN apk add --no-cache libwebp-dev
+RUN apk add --no-cache libjpeg-turbo-dev
+RUN apk add --no-cache freetype-dev
+RUN apk add --no-cache libzip-dev
+RUN apk add --no-cache libpng-dev
+RUN apk add --no-cache imagemagick-dev
+RUN apk add --no-cache linux-headers
+RUN apk cache clean 
 
 FROM base AS php
 # Установка и включение расширений PHP
-RUN docker-php-ext-install exif \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install bz2 \
-    && docker-php-ext-install sodium \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install intl \
-    && docker-php-ext-install pcntl \
-    && docker-php-ext-install bcmath
-
-# Установка и включение расширения GD
-RUN docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd
-
-# Установка и включение расширения imagick
-RUN if [ "$PHP_VERSION" = "8.2" ]; then \
-  pecl install imagick && docker-php-ext-enable imagick; \
-fi
-
-# Установка и включение расширения redis
+RUN docker-php-ext-install exif
+RUN docker-php-ext-install zip
+RUN docker-php-ext-install bz2
+RUN docker-php-ext-install sodium
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install intl
+RUN docker-php-ext-install pcntl
+RUN docker-php-ext-install bcmath
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Установка Xdebug, если WITH_XDEBUG=true
-RUN if [ "$WITH_XDEBUG" = "true" ]; then \
-    pecl install xdebug && docker-php-ext-enable xdebug; \
-fi
+# Установка и включение расширения imagick, echo в RUN очень важно - не трогай!!
+ARG PHP_VERSION
+RUN echo "PHP_VERSION=$PHP_VERSION" && \
+    if [ "$PHP_VERSION" = "8.2" ]; then \
+        pecl install imagick && docker-php-ext-enable imagick; \
+    fi
+
+# Установка Xdebug, если WITH_XDEBUG=true, echo в RUN очень важно - не трогай!!
+ARG WITH_XDEBUG
+RUN echo "WITH_XDEBUG=$WITH_XDEBUG" && \
+    if [ "$WITH_XDEBUG" = "true" ]; then \
+        pecl install xdebug && docker-php-ext-enable xdebug; \
+    fi
 
 # Стадия 2: Установка Composer
 FROM php AS composer
@@ -67,8 +67,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 #RUN curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash \
 #    && apk add infisical
 
-# Стадия 4: Финальная настройка
-FROM composer AS final
+# Стадия очистки
+FROM composer AS clear
+
+# Удаление временных файлов PECL
+RUN rm -rf /tmp/pear
+
+# Удаление временных файлов Composer
+RUN composer clear-cache
+
+# Очистка кеша APK
+RUN apk cache clean && \
+    rm -rf /var/cache/apk/*
+
+# Стадия финальной настройки
+FROM clear AS final
 
 # Копирование конфигурационных файлов
 COPY ./data/supervisord.conf /etc/supervisord.conf

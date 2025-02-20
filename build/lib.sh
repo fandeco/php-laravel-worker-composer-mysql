@@ -28,13 +28,23 @@ create_builder() {
 
 # Функция для сборки образа
 build_image() {
-    local php_version=$1
-    local xdebug=$2
-    local tag=$3
-    local platform=$4
-    # shellcheck disable=SC2155
-    local platform_safe=$(echo "$platform" | tr '/' '_')
-    local log_file="${SCRIPT_DIR}/logs/build_${tag}_${platform_safe}.log"
+    local start_time
+    local end_time
+    local duration
+    local php_version
+    local xdebug
+    local tag
+    local platform
+    local platform_safe
+    local log_file
+
+    start_time=$(date +%s)
+    php_version=$1
+    xdebug=$2
+    tag=$3
+    platform=$4
+    platform_safe=$(echo "$platform" | tr '/' '_')
+    log_file="${SCRIPT_DIR}/logs/build_${tag}_${platform_safe}.log"
     rm -f "$log_file"
     echo "Собираем образ для PHP $php_version с Xdebug=$xdebug на платформе $platform..."
     DOCKER_BUILDKIT=1 docker buildx build \
@@ -43,19 +53,33 @@ build_image() {
         --build-arg WITH_XDEBUG=$xdebug \
         -t traineratwot/php:$tag-$platform_safe \
         --load "${DOCKER_DIR}" &> "$log_file"
+    end_time=$(date +%s)
+    duration=$((end_time - start_time))
+    echo "Сборка образа для PHP $php_version с Xdebug=$xdebug на платформе $platform завершена за $duration s"
 }
 
 # Проверка успешности сборки и архивация образов
 archive_images() {
-    local tag=$1
-    local platform=$2
-    # shellcheck disable=SC2155
-    local platform_safe=$(echo "$platform" | tr '/' '_')
-    local platform_tag="${tag}-${platform_safe}"
+    local start_time
+    local end_time
+    local duration
+    local tag
+    local platform
+    local platform_safe
+    local platform_tag
+
+    start_time=$(date +%s)
+    tag=$1
+    platform=$2
+    platform_safe=$(echo "$platform" | tr '/' '_')
+    platform_tag="${tag}-${platform_safe}"
     echo "Проверяем наличие образа для тега $platform_tag..."
     if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^traineratwot/php:$platform_tag$"; then
         echo "Архивируем образ для тега $platform_tag..."
         docker save -o images/${tag}_${platform_safe}.tar traineratwot/php:$platform_tag
+        end_time=$(date +%s)
+        duration=$((end_time - start_time))
+        echo "Архивация образа для тега $platform_tag завершена за $duration s"
     else
         echo "Образ для тега $platform_tag не найден. Архивация прервана."
         exit 1
