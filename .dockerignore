@@ -3,4 +3,5 @@
 vendor
 node_modules
 *.log
+*.tar
 *.env

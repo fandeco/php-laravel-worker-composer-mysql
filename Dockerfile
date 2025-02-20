@@ -26,6 +26,8 @@ RUN apk add --no-cache libzip-dev
 RUN apk add --no-cache libpng-dev
 RUN apk add --no-cache imagemagick-dev
 RUN apk add --no-cache linux-headers
+RUN apk add --no-cache ncdu
+RUN apk add --no-cache btop
 RUN apk cache clean 
 
 FROM base AS php
@@ -91,9 +93,5 @@ COPY ./data/php.nanorc /etc/nanorc
 # Настройка Bash и рабочей директории
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
 WORKDIR /var/www/html
-
-# Копирование приложения
-COPY --chown=www-data:www-data . /var/www/html
-
 # Смена пользователя
 USER www-data
