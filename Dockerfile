@@ -92,6 +92,7 @@ COPY ./data/php.nanorc /etc/nanorc
 
 # Настройка Bash и рабочей директории
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
+RUN echo 'alias btop="btop --utf-force"' >> /etc/bash/bashrc
 WORKDIR /var/www/html
 # Смена пользователя
 USER www-data
