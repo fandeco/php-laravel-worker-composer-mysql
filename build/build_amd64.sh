@@ -13,10 +13,4 @@ build_image 8.2 true 8.2-xdebug linux/amd64
 build_image 8.4.3 false 8.4 linux/amd64
 build_image 8.4.3 true 8.4-xdebug linux/amd64
 
-# Архивация собранных образов
-archive_images 8.2 amd64
-archive_images 8.2-xdebug amd64
-archive_images 8.4 amd64
-archive_images 8.4-xdebug amd64
-
 echo "Образы для amd64 собраны и архивированы."
