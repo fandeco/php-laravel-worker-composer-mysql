@@ -6,7 +6,7 @@ ARG WITH_XDEBUG=false
 # Основная стадия: Установка зависимостей
 FROM php:${PHP_VERSION}-fpm-alpine AS base
 
-# Установка системных зависимостей и очистка кэша
+# Установка системных зависимостей
 RUN apk update && apk upgrade && \
     apk add --no-cache \
     build-base \
@@ -24,27 +24,33 @@ RUN apk update && apk upgrade && \
     freetype-dev \
     libzip-dev \
     libpng-dev \
-    imagemagick-dev \
-    && rm -rf /var/cache/apk/*
+    imagemagick-dev
 
 FROM base AS php
 # Установка и включение расширений PHP
-RUN docker-php-ext-install -j$(nproc) \
-    exif \
-    zip \
-    bz2 \
-    sodium \
-    pdo_mysql \
-    intl \
-    pcntl \
-    bcmath \
-    && docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && pecl install imagick && docker-php-ext-enable imagick \
-    && pecl install redis && docker-php-ext-enable redis \
-    && if [ "$WITH_XDEBUG" = "true" ]; then \
-        pecl install xdebug && docker-php-ext-enable xdebug; \
-    fi
+RUN docker-php-ext-install exif \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install bz2 \
+    && docker-php-ext-install sodium \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install pcntl \
+    && docker-php-ext-install bcmath
+
+# Установка и включение расширения GD
+RUN docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
+
+# Установка и включение расширения imagick
+RUN pecl install imagick && docker-php-ext-enable imagick
+
+# Установка и включение расширения redis
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Установка Xdebug, если WITH_XDEBUG=true
+RUN if [ "$WITH_XDEBUG" = "true" ]; then \
+    pecl install xdebug && docker-php-ext-enable xdebug; \
+fi
 
 # Стадия 2: Установка Composer
 FROM php AS composer
@@ -52,11 +58,12 @@ FROM php AS composer
 # Копирование Composer из официального образа
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Стадия 3: Установка Infisical (закомментировано)
-# FROM composer AS infisical
-# Установка Infisical CLI
-# RUN curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash \
-#     && apk add infisical
+# Стадия 3: Установка Infisical
+#FROM composer AS infisical
+#
+## Установка Infisical CLI
+#RUN curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash \
+#    && apk add infisical
 
 # Стадия 4: Финальная настройка
 FROM composer AS final
