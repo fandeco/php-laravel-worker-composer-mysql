@@ -1,5 +1,15 @@
 #!/bin/bash
+# Получаем абсолютный путь к текущему скрипту
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC2034
+DOCKER_DIR="$(dirname "${SCRIPT_DIR}")"
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+# shellcheck disable=SC2034
+SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
 
+echo "$SCRIPT_PATH"
+echo "$SCRIPT_DIR"
+echo "$SCRIPT_NAME"
 # Убедимся, что buildx установлен и инициализирован
 check_buildx() {
     if ! docker buildx ls &> /dev/null; then
@@ -24,7 +34,7 @@ build_image() {
     local platform=$4
     # shellcheck disable=SC2155
     local platform_safe=$(echo "$platform" | tr '/' '_')
-    local log_file="logs/build_${tag}_${platform_safe}.log"
+    local log_file="${SCRIPT_DIR}/logs/build_${tag}_${platform_safe}.log"
     rm -f "$log_file"
     echo "Собираем образ для PHP $php_version с Xdebug=$xdebug на платформе $platform..."
     DOCKER_BUILDKIT=1 docker buildx build \
@@ -32,7 +42,7 @@ build_image() {
         --build-arg PHP_VERSION=$php_version \
         --build-arg WITH_XDEBUG=$xdebug \
         -t traineratwot/php:$tag-$platform_safe \
-        --load -f ../Dockerfile . &> "$log_file"
+        --load "${DOCKER_DIR}" &> "$log_file"
 }
 
 # Проверка успешности сборки и архивация образов
