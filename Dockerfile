@@ -71,9 +71,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 FROM composer AS final
 
 # Копирование конфигурационных файлов
-COPY ./supervisor/supervisord.conf /etc/supervisord.conf
-COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
-COPY ./php.nanorc /etc/nanorc
+COPY .data/supervisord.conf /etc/supervisord.conf
+COPY .data/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY .data/php.nanorc /etc/nanorc
 
 # Настройка Bash и рабочей директории
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
