@@ -17,20 +17,21 @@ build_image() {
     local php_version=$1
     local xdebug=$2
     local tag=$3
+    local log_file="logs/build_${tag}.log"
 
     echo "Собираем образ для PHP $php_version с Xdebug=$xdebug..."
-    docker buildx build \
-        --platform linux/arm64,linux/amd64 \
+    DOCKER_BUILDKIT=1 docker buildx build \
+        --platform linux/amd64 \
         --build-arg PHP_VERSION=$php_version \
         --build-arg WITH_XDEBUG=$xdebug \
         -t traineratwot/php:$tag \
-        --push .
+        --push . &> "$log_file"
 }
 
 # Сборка образов
 build_image 8.2 false 8.2
 build_image 8.2 true 8.2-xdebug
-build_image 8.4 false 8.4
-build_image 8.4 true 8.4-xdebug
+build_image 8.4.3 false 8.4
+build_image 8.4.3 true 8.4-xdebug
 
 echo "Все образы собраны и отправлены в реестр."

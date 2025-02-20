@@ -42,7 +42,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Установка и включение расширения imagick
-RUN pecl install imagick && docker-php-ext-enable imagick
+RUN if [ "$PHP_VERSION" = "8.2" ]; then \
+  pecl install imagick && docker-php-ext-enable imagick; \
+fi
 
 # Установка и включение расширения redis
 RUN pecl install redis && docker-php-ext-enable redis
