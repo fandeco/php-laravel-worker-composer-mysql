@@ -61,7 +61,7 @@ build_image() {
     else
         build_success=0
         echo "Загружаем образ из файла ${out_file}..."
-        docker load -i "${out_file}"  &>> "$log_file"
+        docker load -i "${out_file}"  &> "/dev/null"
         if [ $? -ne 0 ]; then
             echo "Ошибка при загрузке образа из файла ${out_file}. Проверьте файл."
             build_success=1
@@ -71,7 +71,7 @@ build_image() {
             if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^traineratwot/php:$tag-$platform_safe$"; then
                 echo "Образ traineratwot/php:$tag-$platform_safe найден в списке."
                 echo "Публикуем образ traineratwot/php:$tag-$platform_safe..."
-                docker push traineratwot/php:"$tag"-"$platform_safe" &>> "$log_file"
+                docker push traineratwot/php:"$tag"-"$platform_safe"  &> "/dev/null"
                 if [ $? -ne 0 ]; then
                     echo "Ошибка при публикации образа traineratwot/php:$tag-$platform_safe. Проверьте лог файл: $log_file"
                     build_success=1
