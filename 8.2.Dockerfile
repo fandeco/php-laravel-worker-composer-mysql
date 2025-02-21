@@ -25,7 +25,9 @@ RUN apk add --no-cache \
     freetype-dev \
     libzip-dev \
     libpng-dev \
-    imagemagick-dev
+    imagemagick-dev \
+    btop \
+    ncdu \
 
 RUN docker-php-ext-install exif \
     && docker-php-ext-install zip \
@@ -51,8 +53,8 @@ RUN pecl install redis && docker-php-ext-enable redis
 COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
 COPY ./php.nanorc /etc/nanorc
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
-WORKDIR /var/www/html
+RUN echo 'alias btop="btop --utf-force"' >> /etc/bash/bashrc
 
-COPY --chown=www-data:www-data . /var/www/html
+WORKDIR /var/www/html
 
 USER www-data

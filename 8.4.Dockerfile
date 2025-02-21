@@ -53,6 +53,4 @@ COPY ./php.nanorc /etc/nanorc
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
 WORKDIR /var/www/html
 
-COPY --chown=www-data:www-data . /var/www/html
-
 USER www-data
