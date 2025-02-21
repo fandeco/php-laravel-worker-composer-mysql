@@ -2,6 +2,13 @@
 # Получаем абсолютный путь к текущему скрипту
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_DIR="$(dirname "${SCRIPT_DIR}")"
+PUSH_IMAGE="false"
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -p|--push) PUSH_IMAGE="true"; shift ;;
+        *) echo "Неизвестный параметр: $1"; exit 1 ;;
+    esac
+done
 
 # Убедимся, что buildx установлен и инициализирован
 check_buildx() {
@@ -70,13 +77,17 @@ build_image() {
             # Проверяем наличие образа в списке
             if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^traineratwot/php:$tag-$platform_safe$"; then
                 echo "Образ traineratwot/php:$tag-$platform_safe найден в списке."
-                echo "Публикуем образ traineratwot/php:$tag-$platform_safe..."
-                docker push traineratwot/php:"$tag"-"$platform_safe"  &> "/dev/null"
-                if [ $? -ne 0 ]; then
-                    echo "Ошибка при публикации образа traineratwot/php:$tag-$platform_safe. Проверьте лог файл: $log_file"
-                    build_success=1
+                if [ "$PUSH_IMAGE" == "true" ]; then
+                    echo "Публикуем образ traineratwot/php:$tag-$platform_safe..."
+                    docker push traineratwot/php:"$tag"-"$platform_safe"  &> "/dev/null"
+                    if [ $? -ne 0 ]; then
+                        echo "Ошибка при публикации образа traineratwot/php:$tag-$platform_safe. Проверьте лог файл: $log_file"
+                        build_success=1
+                    else
+                        echo "Образ traineratwot/php:$tag-$platform_safe успешно опубликован."
+                    fi
                 else
-                    echo "Образ traineratwot/php:$tag-$platform_safe успешно опубликован."
+                    echo "Флаг --push не указан. Образ не будет опубликован в Docker Hub."
                 fi
             else
                 echo "Образ traineratwot/php:$tag-$platform_safe не найден в списке после загрузки."

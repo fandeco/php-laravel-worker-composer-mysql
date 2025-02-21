@@ -25,6 +25,7 @@ RUN apk add --no-cache \
     freetype-dev \
     libzip-dev \
     libpng-dev \
+    linux-headers \
     imagemagick-dev
 
 RUN docker-php-ext-install exif \
