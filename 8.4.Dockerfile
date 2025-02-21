@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.4.3
+ARG PHP_VERSION=8.4
 ARG TZ=Europe/Moscow
 
 # Второй этап: установка зависимостей с использованием Composer
@@ -25,7 +25,6 @@ RUN apk add --no-cache \
     freetype-dev \
     libzip-dev \
     libpng-dev \
-    linux-headers \
     imagemagick-dev
 
 RUN docker-php-ext-install exif \
