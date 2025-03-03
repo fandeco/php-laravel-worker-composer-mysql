@@ -6,7 +6,7 @@ FROM php:8.2-fpm-alpine
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY ./supervisor/supervisord.conf /etc/supervisord.conf
+COPY ./data/supervisord.conf /etc/supervisord.conf
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache \
@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     libpng-dev \
     imagemagick-dev \
     btop \
+    mc \
     ncdu \
 
 RUN docker-php-ext-install exif \
@@ -50,8 +51,8 @@ RUN pecl install imagick && docker-php-ext-enable imagick
 # Установите и включите расширение redis
 RUN pecl install redis && docker-php-ext-enable redis
 
-COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
-COPY ./php.nanorc /etc/nanorc
+COPY ./data/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY ./data/php.nanorc /etc/nanorc
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
 RUN echo 'alias btop="btop --utf-force"' >> /etc/bash/bashrc
 

@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.4.4
 ARG TZ=Europe/Moscow
 
 # Второй этап: установка зависимостей с использованием Composer
@@ -6,7 +6,7 @@ FROM php:8.4-fpm-alpine
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY ./supervisor/supervisord.conf /etc/supervisord.conf
+COPY ./data/supervisord.conf /etc/supervisord.conf
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache \
@@ -44,12 +44,12 @@ RUN curl -1sLf \
 RUN docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg
 RUN docker-php-ext-install -j$(nproc) gd
 # Установите и включите расширение imagick
-# RUN pecl install imagick && docker-php-ext-enable imagick
+RUN pecl install imagick && docker-php-ext-enable imagick
 # Установите и включите расширение redis
 RUN pecl install redis && docker-php-ext-enable redis
 
-COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
-COPY ./php.nanorc /etc/nanorc
+COPY ./data/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY ./data/php.nanorc /etc/nanorc
 RUN echo 'alias nano="nano -l"' >> /etc/bash/bashrc
 WORKDIR /var/www/html
 
